@@ -1,0 +1,6 @@
+<div id="content">
+  <p>[% error %]</p>
+  [% IF msg_link %]
+  <a href="[% msg_link %]" title="[% msg_link_text %]">[% msg_link_text %]</a>
+  [% END %]
+</div>

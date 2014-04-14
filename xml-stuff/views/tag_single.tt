@@ -1,0 +1,17 @@
+<div id="content">
+  <div id="archive-wrap">
+    <h2>[% page_title %]
+  [% FOREACH post IN row.0 %]
+    <article class="archive-item">
+      <span class="archive-date">
+        [% IF post.change_date != '01 Jan 1970' %]
+        [% post.change_date %]
+        [% ELSE %]
+        [% post.create_date %]
+        [% END %]
+        </span>
+        <a class="archive-post-ref" href="/blog/post/[% post.post_id %]" title="[% post.post_title %]">[% post.post_title %]</a>
+    </article>
+  [% END %]
+  </div>
+</div>

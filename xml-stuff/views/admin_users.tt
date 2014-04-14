@@ -1,0 +1,61 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <div class="admin-area">
+    <h3>Edit Users</h3>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>username</th>
+          <th>active</th>
+          <th>role</th>
+          <th>reg_date</th>
+        </tr>
+      </thead>
+      <tbody>
+      [% FOREACH user IN row.0 %]
+        <tr>
+          <form class="admin-form" action="/admin/users" method="post">
+          <input type="hidden" name="uuid" value="[% user.user_uuid %]">
+          <td>[% user.user_name %]</td>
+          <td>
+          [% IF user.user_status == 1 %]
+            <input type="checkbox" checked name="status">
+          [% ELSE %]
+            <input type="checkbox" name="status">
+          [% END %]
+          </td>
+          <td>
+            <select name="role">
+          [% IF user.user_role == 'admin' %]
+            <option value="admin" selected>admin</option>
+            <option value="author">author</option>
+            <option value="editor">editor</option>
+          [% ELSIF user.user_role == 'editor' %]
+            <option value="admin">admin</option>
+            <option value="author">author</option>
+            <option value="editor" selected>editor</option>
+          [% ELSIF user.user_role == 'author' %]
+            <option value="admin">admin</option>
+            <option value="author" selected>author</option>
+            <option value="editor">editor</option>
+          [% END %]
+            </select>
+          </td>
+          <td>[% user.user_create_date %]</td>
+          <td><input type="submit" name="submit" value="update"></td>
+          </form>
+          <td><a href="/admin/user/delete/[% user.user_uuid %]" title="Delete User">Delete User</a></td>
+        </tr>
+      [% END %]
+      </tbody>
+    </table>
+    <br>
+    <h3>Register new user</h3>
+    <form class="admin-form" action="/account/register" method="post">
+      <input type="text" name="username" placeholder="Username" value="[% username %]">
+      <input type="password" placeholder="Passphrase" name="passphrase">
+      <input type="email" name="email" placeholder="Email" value="[% email %]">
+      <input type="submit" value="send" name="submit">
+    </form>
+  </div
+</div>

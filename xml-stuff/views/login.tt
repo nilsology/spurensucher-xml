@@ -1,0 +1,12 @@
+<div id="content">
+  <h2>Login</h2>
+  <pclass=§error" >[% error %]</p>
+  <form action="/login" method="post">
+    <input type="hidden" name="path" value="[% path %]">
+    <input type="text" name="username" value="[% username %]">
+    <input type="password" name="passphrase">
+    <input type="submit" value="send" name="submit">
+  </form>
+  <a href="/account/pwd_lost" title="Lost Password">Lost Password?</a><br>
+  <a href="/account/register" title="Register">Register</a>
+</div>

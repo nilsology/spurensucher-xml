@@ -1,0 +1,15 @@
+<h2>[% page_title %]</h2>
+<section class="admin-menu">
+  Hello [% session.user %]<br>
+  <ul>
+    <li><a href="/admin" title="Dashboard">Dashboard</a></li> 
+    <li><a href="/admin/blog" title="Blog Dash">Blog Dash</a></li>
+    [% IF session.role == 'admin' %]
+    <li><a href="/admin/users" title="Users Dash">Users Dash</a></li>
+    [% END %]
+    <li><a class="logout" href="/logout" title="Log Out">Log Out</a><br></li>
+  </ul>
+  [% IF error %]
+  <p>[% error %]</p>
+  [% END %]
+</section>

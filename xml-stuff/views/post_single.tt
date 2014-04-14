@@ -1,0 +1,36 @@
+<div id="content">
+  <div class="post-wrap">
+    [% FOREACH post IN row.0 %]
+    <aside>
+      <span class="meta-heading">Meta</span>
+      [% IF list != '' %]
+      <a href="#" class="index-trigger"><span>show index</span></a>
+      <section class="post-index">
+      <b>Index</b>
+      [% list %]
+      </section>
+      [% END %]
+      <div class="post-info">
+          Posted on:<br><span class="date">[% post.create_date %]</span><br>
+          [% IF post.change_date != "01 Jan 1970" %]
+          Changed on:<br><span class="date">[% post.change_date %]</span><br>
+          [% END %]
+          [% IF session.user %]
+          <a href="/admin/blog/post/edit/[% post.post_id %]" title="edit post">edit this post</a>
+          [% END %]
+      </div>
+      <div class="tag-info">
+        <ul>
+          [% FOREACH tag IN tags.0 %]
+          <li><a href="/blog/tag/[% tag.tag_id %]" title="[% tag.tag_slug %]">[% tag.tag_slug %]</a></li>
+          [% END %]
+        </ul>
+      </div>
+    </aside>
+    <article>
+      <h2>[% post.post_title %]</h2>
+      [% text %]
+    </article>
+    [% END %]
+  </div>
+</div>

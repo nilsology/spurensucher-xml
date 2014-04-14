@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+<channel>
+<title>Blog title</title>
+<link>blog link (url)</link>
+<description>description</description>
+[% FOREACH post IN row.0 %]
+<item>
+<title>[% post.post_title %]</title>
+<link>YOUR URL(including http[s])/blog/post/[% post.post_id %]</link>
+<guid>YOUR URL(including http[s])/blog/post/[% post.post_id %]</guid>
+<pubDate>[% post.post_create_date %]</pubDate>
+</item>
+[% END %]
+</channel>
+</rss>

@@ -1,0 +1,24 @@
+<div id="content">
+ <!-- <div id="index-aside"><!-- blanc -/-></div>-->
+  <div id="index-wrap">
+      <h2>Think then react.<br>In code as well as in everything else.</h2>
+      <p>
+      I am Nils Koppelmann.<br>Even though I am a student I have hobbies,<br>such as photography and web-development.
+      <a href="/about" title="about me">more about me</a>
+      </p>
+  </div>
+  <div id="archive-wrap">
+  [% FOREACH post IN row.0 %]
+    <article class="archive-item">
+      <span class="archive-date">
+        [% IF post.change_date != '01 Jan 1970' %]
+        [% post.change_date %]
+        [% ELSE %]
+        [% post.create_date %]
+        [% END %]
+        </span>
+        <a class="archive-post-ref" href="/blog/post/[% post.post_id %]" title="[% post.post_title %]">[% post.post_title %]</a>
+    </article>
+  [% END %]
+  </div>
+</div>

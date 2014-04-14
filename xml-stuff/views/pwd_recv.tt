@@ -1,0 +1,9 @@
+<div id="content">
+  <h2>Recover Passwordasd</h2>
+  <p>[% error %]</p>
+  <form action="/account/pwd_recv" method="post">
+    <input type="hidden" name="token" value="[% token %]">
+    <input type="password" name="passphrase">
+    <input type="submit" value="send" name="submit">
+  </form>
+</div>

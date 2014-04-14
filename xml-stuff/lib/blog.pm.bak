@@ -1,0 +1,206 @@
+package blog;
+use Dancer ':syntax';
+use CGI;
+#use CGI::Session;
+use Crypt::SaltedHash;
+use Data::UUID;
+use DBI;
+use POSIX qw(strftime);
+use MIME::Lite;
+use strict;
+use warnings;
+
+our $VERSION = '0.1';
+
+sub UUID {
+  my $ug = new Data::UUID;
+  my $uuid = $ug->create();
+  my $str = $ug->to_string( $uuid );
+  return $str;
+}
+
+get '/' => sub {
+    template 'index';
+};
+
+prefix '/account/' => sub {
+
+get '/register' => sub {
+  template 'register';
+};
+
+post '/register' => sub {
+
+  our ($dbh, $username, $password, $email, $crypt, $shash, $salt, $uuid, $status, @chars, $tmp_token, $timestamp, $sql, $sth, $error_msg);
+
+  $dbh = DBI->connect('dbi:mysql:nilslogy_blog','nilslogy','gepidyicjedvuquodTuc') or die "Connection Error: $DBI::errstr\n";
+  #from form
+  $username = params->{'username'};
+  $password = params->{'passphrase'};
+  $email = params->{'email'};
+  #generating salted hash and salt from password
+  $crypt = Crypt::SaltedHash->new(algorithm=>'SHA-512');
+  $crypt->add($password);
+  $shash = $crypt->generate();
+  $salt = $crypt->salt_hex();
+  
+  $uuid = UUID;
+  $status = false;
+  $timestamp = strftime "%Y-%m-%d %H:%M:%S", localtime;
+  @chars = ("A".."Z", "a".."z");
+  
+  sub checkCredentials {
+#    $sql_check = "SELECT count(*) FROM `users` WHERE username='$username'";
+#    $sth_check = $dbh->prepare($sql_check);
+#    $sth_check->execute or die "SQL Error: $DBI::errstr\n";
+    my ($result) = $dbh->selectrow_array("SELECT count(*) FROM `users` WHERE username='$username' OR email='$email'");
+    if ( $result ne 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  sub confirmAccount {
+    my $from = 'noreply@nilsology.net';
+    my $subject = 'Confirm Account';
+    my $msg = <<END;
+Hello $username,
+please visit the following link to confirm your account and activate it:
+
+http://nilsology.net/confirm/$tmp_token
+
+If you didn't apply for this account just simply do NOT visit the provided link.
+If there are any questions you are having just shoot me an email at info\@nilsology.net.
+
+Cheers
+END
+    my $mail = MIME::Lite->new(
+                          From    => $from,
+                          To      => $email,
+                          Subject => $subject,
+                          Data    => $msg
+                        );
+    $mail->send;
+  }
+
+  if ( params->{'submit'} ) {
+    if ( !$username or !$password or !$email ) {
+      $error_msg = "Please fillout all required fields!";
+      template 'register', { error => $error_msg, username => $username, email => $email };
+    } else {
+      if ( checkCredentials eq true ) { 
+        $tmp_token .= @chars[rand @chars] for 1..99;
+        $username =~ s/\\|\/\/|"|'//g;
+        $email =~ s/\\|\/\/|"|'//g;
+        $sql = "INSERT INTO `users` VALUES ('$uuid','$username', '$shash', '$salt', '$email', '$timestamp', '$status', '$tmp_token');";
+        $sth = $dbh->prepare($sql);
+        $sth->execute or die "SQL Error: $DBI::errstr\n";
+        confirmAccount;
+        undef $tmp_token;
+        $error_msg = "An email has been sent to `$email` for you to confirm this account.";
+        template 'message', { error => $error_msg };
+      } else {
+        $error_msg = "This username or email has already been taken.";
+        template 'register', { error => $error_msg, username => $username, email => $email };
+      }
+    }
+  } else {
+    redirect 'http://nilsology.net/register';
+  }
+};
+
+get '/confirm/:token' => sub {
+  my $token = params->{'token'};
+  my $dbh = DBI->connect('dbi:mysql:nilslogy_blog','nilslogy','gepidyicjedvuquodTuc') or die "Connection Error: $DBI::errstr\n";
+  my $sql = ("SELECT count(*), uuid FROM `users` WHERE tmp_token='$token'");
+  my $sth = $dbh->prepare($sql);
+  $sth->execute or die "SQL Error: $DBI::errstr\n";
+  my @row = $sth->fetchrow_array;
+  my $result = $row[0];
+  my $uuid = $row[1];
+  if ( $result eq 1 ) {
+    #activates account and unsets token (to NULL)
+    my $sql_update = "UPDATE `users` SET status=true, tmp_token=NULL WHERE uuid='$uuid';";
+    my $sth_update = $dbh->prepare($sql_update);
+    $sth_update->execute;
+    return true;
+  } else {
+    return false;
+  }
+};
+
+get '/admin' => sub {
+  my $user = session->{user};
+  return $user;
+};
+
+hook 'before' => sub {
+  if ( ! session('user') and request->path_info !~ m{^/login} and request->path_info !~ m{^/register} and request->path_info !~ m{^/confirm} ) {
+    var requested_path => request->path_info;
+    request->path_info('/login');
+  }
+};
+
+get '/login' => sub {
+  template 'login', { path => vars->{requested_path} };
+};
+
+post '/login' => sub {
+  my ($username, $password, $dbh, $sql, $sth, @row, $crypt, $verified, $shash, $status, $error_msg, $cgi, $session, $cookie);
+  $username = params->{'username'};
+  $password = params->{'passphrase'};
+
+  if ( !$username or !$password ) {
+    $error_msg = "Please provide a username and password.";
+    return template 'login', { error => $error_msg, username => $username };
+  }
+
+  $dbh = DBI->connect('dbi:mysql:nilslogy_blog','nilslogy','gepidyicjedvuquodTuc') or die "Connection Error: $DBI::errstr\n";
+  $sql = "SELECT saltedHash, status FROM `users` WHERE username='$username';";
+  $sth = $dbh->prepare($sql);
+  $sth->execute or die "SQL Error: $DBI::errstr\n";
+  unless ( $sth->rows ) {
+    $error_msg = "Username is incorrect.";
+    return template 'login', { error => $error_msg };
+  }
+
+  @row = $sth->fetchrow_array;
+  $shash = $row[0];
+  $status = $row[1];
+  
+  $crypt = Crypt::SaltedHash->new(algorithm=>'SHA-512');
+  $verified = $crypt->validate($shash, $password);
+  
+  #check if account is activated
+  if ( $status eq 0 ) {
+    $error_msg = "Account is not yet activated. Please click the link in your inbox.";
+  } else {
+    if ( $verified eq 1 ) {
+#      $cgi = new CGI;
+#      $session = new CGI::Session(undef, undef, {Directory=>'/tmp'});
+#      $cookie = $cgi->cookie(CGISESSID => $session->id);
+#      print $cgi->header( -cookie=>$cookie );
+      session user => $username;
+      redirect params->{path} || 'https://nilsology.net'; 
+      $error_msg = 'Successfully logged in!';
+      return template 'message', { error => $error_msg };
+    } else {
+      $error_msg = "Password is incorrect!";
+    }
+  }
+
+  template 'login', { error => $error_msg, username => $username };
+};
+
+get '/logout' => sub {
+  my ($user, $error_msg); 
+  $user = session('user');
+  session->destroy;
+  $error_msg = "$user, have been successfully logged out.";
+  template 'message', { error => $error_msg };
+};
+
+}; #prefix 'account'
+
+true;

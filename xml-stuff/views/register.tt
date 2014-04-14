@@ -1,0 +1,9 @@
+<div id="content">
+  <p>[% error %]</p>
+  <form action="/account/register" method="post">
+    <input type="text" name="username" placeholder="Username" value="[% username %]">
+    <input type="password" placeholder="Passphrase" name="passphrase">
+    <input type="email" name="email" placeholder="Email" value="[% email %]">
+    <input type="submit" value="send" name="submit">
+  </form>
+</div>

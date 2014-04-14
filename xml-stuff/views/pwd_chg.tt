@@ -1,0 +1,7 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <form action="/account/pwd_chg" method="post">
+    <input type="password" name="passphrase">
+    <input type="submit" value="send" name="submit">
+  </form>
+</div>

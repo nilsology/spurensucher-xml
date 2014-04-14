@@ -1,0 +1,35 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>tag name</th>
+        <th>tag occurences</th>
+      </tr>
+    </thead>
+    <tbody>
+    [% FOREACH tag IN row.0 %]
+      <tr>
+        <td>[% tag.tag_slug %]</td>
+        <td>[% tag.amount %]</td>
+        <form class="admin-form" action="/admin/blog/tag/delete" method="post">
+        <input type="hidden" name="tag_id" value="[% tag.tag_id %]">
+        [% IF role == 'editor' %]
+        <td><input type="submit" name="submit" disabled value="delete tag"></td>
+        [% ELSE %]
+        <td><input type="submit" name="submit" value="delete tag"></td>
+        [% END %]
+        </form>
+        <form action="/admin/blog/tag/reset" method="post">
+        <input type="hidden" name="tag_id" value="[% tag.tag_id %]">
+        [% IF role == 'editor' %]
+        <td><input type="submit" name="submit" disabled value="reset tag"></td>
+        [% ELSE %]
+        <td><input type="submit" name="submit" value="reset tag"></td>
+        [% END %]
+        </form>
+      </tr>
+    [% END %]
+    </tbody>
+  </table>
+</div>

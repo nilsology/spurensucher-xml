@@ -1,0 +1,9 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <div class="admin-area">
+    <ul>
+      <li><a href="/account/pwd_chg" title="Change Password">Change Password</a></li>
+      <li><a href="/account/delete" title="Delete account">Delete Account</a></li>
+    </ul>
+  </div>
+</div>
