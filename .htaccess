@@ -1,0 +1,6 @@
+Options +ExecCGI
+AddHandler cgi-script .cgi .pl
+RewriteEngine On
+RewriteRule (.*) http://localhost:61235/$1 [P]
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
