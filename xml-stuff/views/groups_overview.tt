@@ -1,0 +1,29 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <div class="admin-area">
+    <h3>Groups</h3>
+    <a href="/admin/group/new" title="New group">Create a new group</a><br>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>groupname</th>
+          <th>members</th>
+        </tr>
+      </thead>
+      <tbody>
+      [% FOREACH group IN row.0 %]
+        <tr>
+          <form class="admin-form" action="/admin/groups" method="post">
+          <input type="hidden" name="gid" value="[% group.gid %]">
+          <td>[% group.group_slug %]</td>
+          <td>
+          Membercount ...
+          </td>
+          </form>
+          <td><a href="/admin/group/delete/[% group.gid %]" title="Delete Group">Delete Group</a></td>
+        </tr>
+      [% END %]
+      </tbody>
+    </table>
+  </div>
+</div>

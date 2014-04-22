@@ -54,7 +54,7 @@ post '/register' => sub {
   # chars used to generate token
   @chars = ("A".."Z", "a".."z");
   # standard role - can be changed later
-  $role = 'editor';
+  $role = 'student';
   
   # check if username / email are already registerd
   sub checkCredentials {
@@ -74,7 +74,7 @@ post '/register' => sub {
 Hello $username,
 please visit the following link to confirm your account and activate it:
 
-http://nilsology.net/account/confirm/activate/$tmp_token
+http://spurensuche.nilsology.net/account/confirm/activate/$tmp_token
 
 If you didn't apply for this account just simply do NOT visit the provided link.
 If there are any questions you are having just shoot me an email at info\@nilsology.net.
@@ -118,6 +118,13 @@ END
             user_status => $status,
             user_token => $tmp_token,
             user_role => $role
+          });
+        # get the default-groupID
+        my $defaultGroup = database->quick_lookup('usergroups', { g_slug => 'default' }, 'gid');
+        # associate add newly created user to default-group
+        databse->quick_insert('users_groups', {
+            uuid => $uuid,
+            gid => $defaultGroup
           });
         # send confirm-email
         confirmAccount;
@@ -180,7 +187,7 @@ get '/delete' => sub {
 Hello $username,
 please visit the following link to confirm that you want your account to be deleted::
 
-http://nilsology.net/account/confirm/delete/$tmp_token
+http://spurensuche.nilsology.net/account/confirm/delete/$tmp_token
 
 If you do NOT want your account to be deleted just do NOT visit the provided link.
 Cheers
@@ -311,7 +318,7 @@ post '/pwd_lost' => sub {
 Hello $username,
 please visit the following link if you want to recover your password:
 
-http://nilsology.net/account/pwd_recv/$tmp_token
+http://spurensuche.nilsology.net/account/pwd_recv/$tmp_token
 
 If you do NOT want to recover your password just do NOT follow the provided link.
 Cheers
