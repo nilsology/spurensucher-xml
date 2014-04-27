@@ -120,9 +120,9 @@ END
             user_role => $role
           });
         # get the default-groupID
-        my $defaultGroup = database->quick_lookup('usergroups', { g_slug => 'default' }, 'gid');
+        my $defaultGroup = database->quick_lookup('usergroups', { group_slug  => 'default' }, 'gid');
         # associate add newly created user to default-group
-        databse->quick_insert('users_groups', {
+        database->quick_insert('users_groups', {
             uuid => $uuid,
             gid => $defaultGroup
           });

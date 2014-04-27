@@ -70,16 +70,22 @@ get '/user/delete/:uuid' => sub {
 
 # handle group-changes etc.
 get '/groups' => sub {
-  my ($sql, $sth, @row);
+  my ($sql, $sth, @row, @counts);
   if ( session('role') eq 'admin' or session('role') eq 'teacher' ) {
     # select all groups
     $sql = "SELECT * FROM usergroups;";
     $sth = database->prepare($sql);
     $sth->execute();
     @row = $sth->fetchall_arrayref({}); 
+    # count people in group - not yet implemented
+    $sql = "SELECT gid, count(uuid) AS amount FROM users_groups GROUP BY gid;";
+    $sth = database->prepare($sql);
+    $sth->execute();
+    @counts = $sth->fetchall_arrayref({});
     template 'groups_overview', {
       page_title => 'Groups Overview',
-      row => \@row
+      row => \@row,
+      counts => \@counts
     };
   } else {
     redirect '/';
@@ -124,6 +130,35 @@ get '/group/delete/:id' => sub {
   if ( session('role') eq 'admin' or session('role') eq 'teacher' ) {
     database->quick_delete('usergroups', { gid => params->{'id'} });
     redirect '/admin/groups';
+  } else {
+    redirect '/';
+  }
+};
+
+get '/group/add/:gid' => sub {
+  my ($sql, $sth, @row);
+  if ( session('role') eq 'admin' or session('role') eq 'teacher' ) {
+    $sql = "SELECT user_uuid, user_name FROM users where user_status = 1;"; 
+    $sth = database->prepare($sql);
+    $sth->execute();
+    @row = $sth->fetchall_arrayref({}); 
+    my $gid = params->{'gid'};
+    my $g_slug = database->quick_lookup('usergroups', { gid => $gid }, 'group_slug');
+    template 'add_group_member', {
+      page_title => "Add Group Members to $g_slug",
+      gid => $gid,
+      row => \@row 
+    };
+  } else {
+    redirect '/';
+  }
+};
+
+post '/group/add' => sub {
+  if ( session('role') eq 'admin' or session('role') eq 'teacher' ) {
+    my $gid = params->{'gid'};
+    database->quick_insert('users_groups', { gid => $gid, uuid => params->{'uuid'} }); 
+    redirect "/admin/group/add/$gid";
   } else {
     redirect '/';
   }

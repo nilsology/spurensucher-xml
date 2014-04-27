@@ -14,10 +14,17 @@
       [% FOREACH group IN row.0 %]
         <tr>
           <form class="admin-form" action="/admin/groups" method="post">
+[% SET gid = group.gid %]
           <input type="hidden" name="gid" value="[% group.gid %]">
           <td>[% group.group_slug %]</td>
           <td>
-          Membercount ...
+          [% FOREACH count IN counts.0 %]
+          [% IF count.gid == gid %]
+          [% count.amount %] Members
+          [% END %]
+          [% END %]
+          <br>
+          <a href="/admin/group/add/[% group.gid %]" title="Add Members">Add Members</a>
           </td>
           </form>
           <td><a href="/admin/group/delete/[% group.gid %]" title="Delete Group">Delete Group</a></td>
