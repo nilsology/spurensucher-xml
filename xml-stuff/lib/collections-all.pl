@@ -23,7 +23,7 @@ get '/collections' => sub {
   $sth->execute;
   @row = $sth->fetchall_arrayref({});
   
-  # count people in group - not yet implemented
+  # count people in group
   $sql = "SELECT tcid, count(tid) AS amount FROM taskcollections_tasks GROUP BY tcid;";
   $sth = database->prepare($sql);
   $sth->execute();
@@ -69,36 +69,22 @@ post '/collection/new' => sub {
   my $uuid = database->quick_lookup('users', { user_name => session('user') }, 'user_uuid');
   my $title = params->{'title'};
 
-  my $ifExist = database->quick_count('taskcollections', { tc_title => $title });
+  database->quick_insert('taskcollections', {
+      tc_title => $title
+    });
 
-  if ( $ifExist == 0 ) {
+  my $tcid = database->{mysql_insertid};
 
-    database->quick_insert('taskcollections', {
-        tc_title => $title
-      });
+  database->quick_insert('user_taskcollections', {
+      tcid => $tcid,
+      uuid => $uuid
+    });
 
-    my $tcid = database->quick_lookup('taskcollections', { tc_title => $title }, 'tcid');
-
-    database->quick_insert('user_taskcollections', {
-        tcid => $tcid,
-        uuid => $uuid
-      });
-
-    redirect "/admin/collection/$tcid";
-      
-  } else {
-    
-    template 'tc_new', {
-      page_title => 'New Collection',
-      error_msg => 'Title already exists.',
-      title => $title 
-    };
-
-  }
+  redirect "/admin/collection/$tcid";
 };
 
 get '/collection/:tcid' => sub {
-  my ($sql, $sth, @row);
+  my ($sql, $sth, @row, @counts);
 
   my $tcid = params->{'tcid'};
   my $role = session('role');
@@ -112,7 +98,13 @@ get '/collection/:tcid' => sub {
     $sth = database->prepare($sql);
     $sth->execute($tcid);
     @row = $sth->fetchall_arrayref({});
-    
+      
+    # count hints per task
+    $sql = "SELECT tid, count(hid) AS amount FROM tasks_hints GROUP BY tid;";
+    $sth = database->prepare($sql);
+    $sth->execute();
+    @counts = $sth->fetchall_arrayref({});
+
     # selecting username associated (through $user_uuid) with tc
     my $username = database->quick_lookup('users', { user_uuid => $ifAllowed }, 'user_name');
 
@@ -121,6 +113,7 @@ get '/collection/:tcid' => sub {
 
     template 'tc_single', {
       row => \@row,
+      counts => \@counts,
       username => $username,
       tc_title => $tc_title,
       tcid => $tcid,
@@ -166,7 +159,33 @@ post '/collection/edit' => sub {
 
 get '/collection/delete/:tcid' => sub {
 
-  # later when the rest is implemented
+  # delete taskcollection + all associated tasks and hints
+
+  # select all task-IDs
+  my @tasks = database->quick_select('taskcollections_tasks', { tcid => params->{'tcid'} }, { columns => 'tid' });
+  
+  foreach (@tasks) {
+    
+    # select all hint-IDs
+    my @hints = database->quick_select('tasks_hints', { tid => $_->{'tid'} }, { columns => 'hid' }); 
+
+    foreach (@hints) {
+      database->quick_delete('hints', { hid => $_->{'hid'} });
+    }; 
+
+    database->quick_delete('tasks_hints', { tid => $_->{'tid'} });
+
+    database->quick_delete('tasks', { tid => $_->{'tid'} });
+
+  };
+
+  database->quick_delete('taskcollections_tasks', { tcid => params->{'tcid'} });
+
+  database->quick_delete('taskcollections', { tcid => params->{'tcid'} });
+  
+  database->quick_delete('user_taskcollections', { tcid => params->{'tcid'} });
+
+  redirect "/admin/collections";
 
 };
 
@@ -232,19 +251,127 @@ post '/task/edit' => sub {
 
 };
 
-get '/task/delete/:id' => sub {
+get '/task/delete/:tid/:tcid' => sub {
 
-  # later when the rest is implemented
+  # delete task + all associated hints
+
+  # select all hint-IDs
+  my @hints = database->quick_select('tasks_hints', { tid => params->{'tid'} }, { columns => 'hid' }); 
+
+  foreach (@hints) {
+    database->quick_delete('hints', { hid => $_->{'hid'} });
+  }; 
+
+  database->quick_delete('tasks_hints', { tid => params->{'tid'} });
+
+  database->quick_delete('tasks', { tid => params->{'tid'} });
+  
+  my $tcid = params->{'tcid'};
+
+  redirect "/admin/collection/$tcid";
 
 };
 
-get '/task/:id' => sub {
+get '/task/:tid' => sub {
 
   # should display the associated hints
-  # after Hints are implemented
+  my ($sql, $sth, @row);
+  my $tid = params->{'tid'};
 
+  # selecting all tasks (+ items) associated with the task_collection with the tcid of :tcid
+  $sql = "SELECT hints.hid, h_index, h_text, h_score FROM hints JOIN tasks_hints ON tasks_hints.tid = ? AND tasks_hints.hid = hints.hid ORDER BY h_index;";
+  $sth = database->prepare($sql);
+  $sth->execute($tid);
+  @row = $sth->fetchall_arrayref({});
+
+  template 'task_single', {
+    row => \@row,
+    tid => $tid,
+    page_title => "Task Overview"
+  };
 
 };
 
+get '/hint/new/:tid' => sub {
+
+  template 'hint_new', {
+    page_title => 'New Hint', 
+    tid => params->{'tid'}
+  };
+
+};
+
+post '/hint/new' => sub {
+  
+  my $h_text = params->{'h_text'};
+  my $h_index = params->{'h_index'};
+  my $h_score = params->{'h_score'};
+  my $tid = params->{'tid'};
+
+  database->quick_insert('hints', {
+      h_text => $h_text,
+      h_index => $h_index,
+      h_score => $h_score
+    });
+
+  my $hid = database->{mysql_insertid};
+
+  database->quick_insert('tasks_hints', {
+      tid => $tid,
+      hid => $hid
+    });
+
+  redirect "/admin/task/$tid";
+
+};
+
+get '/hint/edit/:hid/:tid' => sub {
+  my $hid = params->{'hid'};
+  my $tid = params->{'tid'};
+
+  template 'hint_edit', {
+    page_title => 'Edit Hint',
+    hid => $hid,
+    tid => $tid,
+    h_text => database->quick_lookup('hints', { hid => $hid }, 'h_text'), 
+    h_score => database->quick_lookup('hints', { hid => $hid }, 'h_score'), 
+    h_index => database->quick_lookup('hints', { hid => $hid }, 'h_index') 
+  };
+};
+
+post '/task/edit' => sub {
+  my $hid = params->{'hid'};
+  my $tid = params->{'tid'};
+  my $h_text = params->{'h_text'};
+  my $h_score = params->{'h_score'};
+  my $h_index = params->{'h_index'};
+
+  database->quick_update('hints', { hid => $hid }, {
+      h_text => $h_text,
+      h_score => $h_score,
+      h_index => $h_index
+    });
+
+  redirect "/admin/task/$tid";
+
+};
+
+
+get '/hint/delete/:hid/:tid' => sub {
+  
+  # deleting a hint of :hid and removing the assoc with :tid
+
+  my $tid = params->{'tid'};
+  my $hid = params->{'hid'};
+
+  # delete the hint
+  database->quick_delete('hints', { hid => $hid });
+
+  # remove the task assoc
+  database->quick_delete('tasks_hints', { tid => $tid, hid => $hid });
+
+  redirect "/admin/task/$tid";
+  
+};
 
 prefix undef;

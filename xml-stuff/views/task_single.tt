@@ -1,0 +1,27 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <table class="admin-table">
+    <a href="/admin/hint/new/[% tid %]" title="New Hint">New Hint</a><br><br>
+    <thead>
+      <tr>
+        <th>index</th>
+        <th>hint</th>
+        <th>score</th>
+      </tr>
+    </thead>
+    <tbody>
+    [% FOREACH post IN row.0 %]
+      <tr>
+        <td>[% post.h_index %]</td>
+        <td>[% post.h_text %]</td>
+        <td>[% post.h_score %]</td>
+        <td>[% username %]</td>
+        <td>
+          <a href="/admin/task/edit/[% post.hid %]/[% tid %]" title="Edit">Edit</a><br>
+          <a href="/admin/hint/delete/[% post.hid %]/[% tid %]" title="Delete">Delete</a>
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+  </table>
+</div>

@@ -226,10 +226,47 @@ get '/confirm/delete/:token' => sub {
   $uuid = $row[1];
   $username = $row[2];
   $sql = $sth = undef;
+
   if ( $result eq 1 ) {
-    $sql = "DELETE FROM `users` WHERE user_uuid=?;";
-    $sth = database->prepare($sql);
-    $sth->execute($uuid) or die "SQL Error: $DBI::errstr\n";
+
+    my @collections = database->quick_select('user_taskcollections', { uuid => $uuid }, { columns => 'tcid' });
+    
+    foreach (@collections) {
+
+      # delete taskcollection + all associated tasks and hints
+
+      # select all task-IDs
+      my @tasks = database->quick_select('taskcollections_tasks', { tcid => params->{'tcid'} }, { columns => 'tid' });
+      
+      foreach (@tasks) {
+        
+        # select all hint-IDs
+        my @hints = database->quick_select('tasks_hints', { tid => $_->{'tid'} }, { columns => 'hid' }); 
+
+        foreach (@hints) {
+          database->quick_delete('hints', { hid => $_->{'hid'} });
+        }; 
+
+        database->quick_delete('tasks_hints', { tid => $_->{'tid'} });
+
+        database->quick_delete('tasks', { tid => $_->{'tid'} });
+
+      };
+
+      database->quick_delete('taskcollections_tasks', { tcid => $_->{'tcid'} });
+
+      database->quick_delete('taskcollections', { tcid => $_->{'tcid'} });
+      
+      database->quick_delete('user_taskcollections', { tcid => $_->{'tcid'} });
+
+    };
+
+    # delete from all groups
+    database->quick_delete('users_groups', { uuid => $uuid }); 
+
+    # delete user-account
+    database->quick_delete('users', { uuid => $uuid });
+
     session->destroy;
     $error_msg = "Your account has been deleted successfully!";
   } else {

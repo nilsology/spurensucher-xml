@@ -6,6 +6,8 @@
         <th>index</th>
         <th>text</th>
         <th>score</th>
+        <th>owner</th>
+        <th>hints</th>
       </tr>
     </thead>
     <tbody>
@@ -16,8 +18,19 @@
         <td>[% post.t_score %]</td>
         <td>[% username %]</td>
         <td>
+          [% SET tid = post.tid %]
+          [% FOREACH count IN counts.0 %]
+          [% IF count.tid == tid %]
+          [% count.amount %] Hints
+          [% END %]
+          [% END %]
+          <br>
+          <a href="/admin/hint/new/[% post.tid %]" title="Add Hint">Add Hint</a>
+        </td>
+        <td>
           <a href="/admin/task/[% post.tid %]" title="View">View</a><br>
-          <a href="/admin/task/edit/[% post.tid %]/[% tcid %]" title="Edit">Edit</a>
+          <a href="/admin/task/edit/[% post.tid %]/[% tcid %]" title="Edit">Edit</a><br>
+          <a href="/admin/task/delete/[% post.tid %]/[% tcid %]" title="Delete">Delete</a>
         </td>
       </tr>
     [% END %]
