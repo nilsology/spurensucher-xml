@@ -22,7 +22,9 @@ get '/' => sub {
   }
 };
 
-load 'account_routes.pl', 'login_routes.pl', 'admin_routes.pl', 'blog_routes.pl', 'blog_display.pl', 'page_routes.pl';
+load 'account_routes.pl', 'login_routes.pl', 'admin_routes.pl';
+
+load 'collections-all.pl';
 
 
 true;

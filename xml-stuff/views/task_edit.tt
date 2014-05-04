@@ -1,0 +1,13 @@
+<div id="content">
+  <div class="admin-area">
+    [% INCLUDE admin_dash_menu.tt %]
+    <form class="admin-form" action="/admin/task/edit" method="post">
+      <input type="hidden" name="tid" value="[% tid %]">
+      <input type="hidden" name="tcid" value="[% tcid %]">
+      <textarea name="t_text">[% t_text %]</textarea><br>
+      <input type="number" name="t_score" value="[% t_score %]">
+      <input type="number" name="t_index" value="[% t_index %]">
+      <input type="submit" name="submit" value="update"><br>
+    </form>
+  </div>
+</div>

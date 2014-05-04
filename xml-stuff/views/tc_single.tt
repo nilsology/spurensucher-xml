@@ -1,0 +1,26 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>index</th>
+        <th>text</th>
+        <th>score</th>
+      </tr>
+    </thead>
+    <tbody>
+    [% FOREACH post IN row.0 %]
+      <tr>
+        <td>[% post.t_index %]</td>
+        <td>[% post.t_text %]</td>
+        <td>[% post.t_score %]</td>
+        <td>[% username %]</td>
+        <td>
+          <a href="/admin/task/[% post.tid %]" title="View">View</a><br>
+          <a href="/admin/task/edit/[% post.tid %]/[% tcid %]" title="Edit">Edit</a>
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,35 @@
+<div id="content">
+  [% INCLUDE admin_dash_menu.tt %]
+  <div class="admin-area">
+    <a href="/admin/collections/my" title="Just my collections">Just my Collections</a><br>
+    <a href="/admin/collections" title="All collections">All Collections</a><br><br>
+    <a href="/admin/collection/new" title="New Collection">Create a new Collection</a><br><br>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>collection</th>
+          <th>tasks</th>
+        </tr>
+      </thead>
+      <tbody>
+      [% FOREACH tc IN row.0 %]
+        <tr>
+[% SET tcid = tc.tcid %]
+          <td><a href="/admin/collection/[% tc.tcid %]">[% tc.tc_title %]</a></td>
+          <td>
+          [% FOREACH count IN counts.0 %]
+          [% IF count.tcid == tcid %]
+          [% count.amount %] Tasks
+          [% END %]
+          [% END %]
+          <br>
+          <a href="/admin/task/new/[% tcid %]" title="New Task">New Task</a>
+          </td>
+          </form>
+          <td><a href="/admin/collection/delete/[% tcid %]" title="Delete Collection">Delete Collection</a></td>
+        </tr>
+      [% END %]
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -138,7 +138,7 @@ get '/group/delete/:id' => sub {
 get '/group/add/:gid' => sub {
   my ($sql, $sth, @row);
   if ( session('role') eq 'admin' or session('role') eq 'teacher' ) {
-    $sql = "SELECT user_uuid, user_name FROM users where user_status = 1;"; 
+    $sql = "SELECT user_uuid, user_name FROM users;"; 
     $sth = database->prepare($sql);
     $sth->execute();
     @row = $sth->fetchall_arrayref({}); 

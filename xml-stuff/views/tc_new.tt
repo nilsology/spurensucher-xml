@@ -1,0 +1,9 @@
+<div id="content">
+  <div class="admin-area">
+    [% INCLUDE admin_dash_menu.tt %]
+    <form class="admin-form" action="/admin/collection/new" method="post">
+      <input type="text" placeholder="title" name="title" value="[% title %]" required>
+      <input type="submit" name="submit" value="Create"><br>
+    </form>
+  </div>
+</div>

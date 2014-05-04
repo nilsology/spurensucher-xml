@@ -1,0 +1,10 @@
+<div id="content">
+  <div class="admin-area">
+    [% INCLUDE admin_dash_menu.tt %]
+    <form class="admin-form" action="/admin/collection/edit" method="post">
+      <input type="hidden" name="tcid" value="[% tcid %]">
+      <input type="text" placeholder="title" name="tc_title" value="[% tc_title %]" required>
+      <input type="submit" name="submit" value="Edit"><br>
+    </form>
+  </div>
+</div>
