@@ -6,8 +6,8 @@
     [% IF session.role == 'admin' %]
     <li><a href="/admin/users" title="Users Dash">Users Dash</a></li>
     <li><a href="/admin/groups" title="Groups Dash">Groups Dash</a></li>
-    <li><a href="/admin/collections" title="Tasks Dash">Tasks Dash</a></li>
     [% END %]
+    <li><a href="/admin/collections" title="Tasks Dash">Tasks Dash</a></li>
     <li><a class="logout" href="/logout" title="Log Out">Log Out</a><br></li>
   </ul>
   [% IF error %]

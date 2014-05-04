@@ -93,7 +93,6 @@ get '/collection/:tcid' => sub {
   if ( $ifAllowed eq $uuid or $role eq 'teacher' or $role eq 'admin' ) {
 
     # selecting all tasks (+ items) associated with the task_collection with the tcid of :tcid
-#    $sql = "SELECT tasks.tid, t_index, t_text, t_score FROM tasks JOIN taskcollections_tasks ON taskcollections_tasks.tcid = ? ORDER BY t_index;";
     $sql = "SELECT tasks.tid, t_index, t_text, t_score FROM tasks JOIN taskcollections_tasks ON taskcollections_tasks.tcid = ? AND taskcollections_tasks.tid = tasks.tid ORDER BY t_index;";
     $sth = database->prepare($sql);
     $sth->execute($tcid);
@@ -265,6 +264,8 @@ get '/task/delete/:tid/:tcid' => sub {
   database->quick_delete('tasks_hints', { tid => params->{'tid'} });
 
   database->quick_delete('tasks', { tid => params->{'tid'} });
+
+  database->quick_delete('taskcollections_tasks', {  tid => params->{'tid'} });
   
   my $tcid = params->{'tcid'};
 
@@ -272,11 +273,12 @@ get '/task/delete/:tid/:tcid' => sub {
 
 };
 
-get '/task/:tid' => sub {
+get '/task/:tid/:tcid' => sub {
 
   # should display the associated hints
   my ($sql, $sth, @row);
   my $tid = params->{'tid'};
+  my $tcid = params->{'tcid'};
 
   # selecting all tasks (+ items) associated with the task_collection with the tcid of :tcid
   $sql = "SELECT hints.hid, h_index, h_text, h_score FROM hints JOIN tasks_hints ON tasks_hints.tid = ? AND tasks_hints.hid = hints.hid ORDER BY h_index;";
@@ -287,16 +289,18 @@ get '/task/:tid' => sub {
   template 'task_single', {
     row => \@row,
     tid => $tid,
+    tcid => $tcid,
     page_title => "Task Overview"
   };
 
 };
 
-get '/hint/new/:tid' => sub {
+get '/hint/new/:tid/:tcid' => sub {
 
   template 'hint_new', {
     page_title => 'New Hint', 
-    tid => params->{'tid'}
+    tid => params->{'tid'},
+    tcid => params->{'tcid'}
   };
 
 };
@@ -307,6 +311,7 @@ post '/hint/new' => sub {
   my $h_index = params->{'h_index'};
   my $h_score = params->{'h_score'};
   my $tid = params->{'tid'};
+  my $tcid = params->{'tcid'};
 
   database->quick_insert('hints', {
       h_text => $h_text,
@@ -321,27 +326,30 @@ post '/hint/new' => sub {
       hid => $hid
     });
 
-  redirect "/admin/task/$tid";
+  redirect "/admin/task/$tid/$tcid";
 
 };
 
-get '/hint/edit/:hid/:tid' => sub {
+get '/hint/edit/:hid/:tid/:tcid' => sub {
   my $hid = params->{'hid'};
   my $tid = params->{'tid'};
+  my $tcid = params->{'tcid'};
 
   template 'hint_edit', {
     page_title => 'Edit Hint',
     hid => $hid,
     tid => $tid,
+    tcid => $tcid,
     h_text => database->quick_lookup('hints', { hid => $hid }, 'h_text'), 
     h_score => database->quick_lookup('hints', { hid => $hid }, 'h_score'), 
     h_index => database->quick_lookup('hints', { hid => $hid }, 'h_index') 
   };
 };
 
-post '/task/edit' => sub {
+post '/hint/edit' => sub {
   my $hid = params->{'hid'};
   my $tid = params->{'tid'};
+  my $tcid = params->{'tcid'};
   my $h_text = params->{'h_text'};
   my $h_score = params->{'h_score'};
   my $h_index = params->{'h_index'};
@@ -352,17 +360,18 @@ post '/task/edit' => sub {
       h_index => $h_index
     });
 
-  redirect "/admin/task/$tid";
+  redirect "/admin/task/$tid/$tcid";
 
 };
 
 
-get '/hint/delete/:hid/:tid' => sub {
+get '/hint/delete/:hid/:tid/:tcid' => sub {
   
   # deleting a hint of :hid and removing the assoc with :tid
 
   my $tid = params->{'tid'};
   my $hid = params->{'hid'};
+  my $tcid = params->{'tcid'};
 
   # delete the hint
   database->quick_delete('hints', { hid => $hid });
@@ -370,7 +379,7 @@ get '/hint/delete/:hid/:tid' => sub {
   # remove the task assoc
   database->quick_delete('tasks_hints', { tid => $tid, hid => $hid });
 
-  redirect "/admin/task/$tid";
+  redirect "/admin/task/$tid/$tcid";
   
 };
 

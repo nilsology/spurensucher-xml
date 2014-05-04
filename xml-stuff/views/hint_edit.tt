@@ -1,12 +1,13 @@
 <div id="content">
   <div class="admin-area">
     [% INCLUDE admin_dash_menu.tt %]
+    <a href="/admin/task/[% tid %]/[% tcid %]" title="Back to Task">Back to Task</a><br><br>
     <form class="admin-form" action="/admin/hint/edit" method="post">
       <input type="hidden" name="tid" value="[% tid %]">
       <input type="hidden" name="tcid" value="[% tcid %]">
-      <textarea name="h_text" placeholder="Text here..."></textarea><br>
-      <input type="number" name="h_score" placeholder="Score">
-      <input type="number" name="h_index" placeholder="Index">
+      <textarea name="h_text">[% h_text %]</textarea><br>
+      <input type="number" name="h_score" value="[% h_score %]">
+      <input type="number" name="h_index" value="[% h_index %]">
       <input type="submit" name="submit" value="update"><br>
     </form>
   </div>

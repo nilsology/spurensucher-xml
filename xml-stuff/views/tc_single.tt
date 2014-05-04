@@ -1,6 +1,7 @@
 <div id="content">
   [% INCLUDE admin_dash_menu.tt %]
   <table class="admin-table">
+    <a href="/admin/task/new/[% tcid %]" title="New Task">New Task</a><br><br>
     <thead>
       <tr>
         <th>index</th>
@@ -25,10 +26,10 @@
           [% END %]
           [% END %]
           <br>
-          <a href="/admin/hint/new/[% post.tid %]" title="Add Hint">Add Hint</a>
+          <a href="/admin/hint/new/[% post.tid %]/[% tcid %]" title="Add Hint">Add Hint</a>
         </td>
         <td>
-          <a href="/admin/task/[% post.tid %]" title="View">View</a><br>
+          <a href="/admin/task/[% post.tid %]/[% tcid %]" title="View">View</a><br>
           <a href="/admin/task/edit/[% post.tid %]/[% tcid %]" title="Edit">Edit</a><br>
           <a href="/admin/task/delete/[% post.tid %]/[% tcid %]" title="Delete">Delete</a>
         </td>

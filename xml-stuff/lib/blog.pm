@@ -19,6 +19,8 @@ require_ssl();
 get '/' => sub {
   if ( ! session('user') ) {
     template 'login';
+  } else {
+    redirect '/admin';
   }
 };
 

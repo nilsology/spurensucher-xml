@@ -3,9 +3,9 @@
   <record>
     <Aufgabenstellung>[% task.t_text %]</Aufgabenstellung>
     <Score>[% task.t_score %]</Score>[% SET tid = task.tid %][% FOREACH hint IN hints.0 %][% IF hint.tid == tid %]
-    <Hinweis[% loop.count %]>[% hint.h_text %]</Hinweis[% loop.count %]>
-    <Subtract[% loop.count %]>[% hint.h_score %]</Subtract[% loop.count %]>[% END %][% END %]
-    <Bildname>Aufgabe1.png</Bildname>
+    <Hinweis[% hint.h_index %]>[% hint.h_text %]</Hinweis[% hint.h_index %]>
+    <Subtract[% hint.h_index %]>[% hint.h_score %]</Subtract[% hint.h_index %]>[% END %][% END %]
+    <Bildname>Aufgabe[% loop.count %].png</Bildname>
   </record>[% END %]
 </data-set>
 
