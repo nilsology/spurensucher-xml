@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<data-set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">[% FOREACH task IN tasks.0 %]
+  <record>
+    <Aufgabenstellung>[% task.t_text %]</Aufgabenstellung>
+    <Score>[% task.t_score %]</Score>[% SET tid = task.tid %][% FOREACH hint IN hints.0 %][% IF hint.tid == tid %]
+    <Hinweis[% loop.count %]>[% hint.h_text %]</Hinweis[% loop.count %]>
+    <Subtract[% loop.count %]>[% hint.h_score %]</Subtract[% loop.count %]>[% END %][% END %]
+    <Bildname>Aufgabe1.png</Bildname>
+  </record>[% END %]
+</data-set>
+

@@ -27,6 +27,7 @@
           </td>
           </form>
           <td><a href="/admin/collection/delete/[% tcid %]" title="Delete Collection">Delete Collection</a></td>
+          <td><a href="/admin/collection/download/[% tcid %]" download="datasheet-dump-[% tcid %].xml" title="Download Collection">DOWNLOAD</a></td>
         </tr>
       [% END %]
       </tbody>

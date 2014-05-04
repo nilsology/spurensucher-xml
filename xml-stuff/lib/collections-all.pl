@@ -374,4 +374,27 @@ get '/hint/delete/:hid/:tid' => sub {
   
 };
 
+get '/collection/download/:tcid' => sub {
+  
+  my ($sql, $sth, @tasks, @hints);
+
+  $sql = "SELECT tasks.tid, t_index, t_text, t_score FROM tasks JOIN taskcollections_tasks ON taskcollections_tasks.tcid = ? AND taskcollections_tasks.tid = tasks.tid ORDER BY t_index;";
+  $sth = database->prepare($sql);
+  $sth->execute(params->{'tcid'});
+  
+  @tasks = $sth->fetchall_arrayref({});
+
+  $sql = "SELECT hints.hid, hints.h_index, hints.h_text, hints.h_score, th.tid FROM hints JOIN tasks_hints th ON th.hid = hints.hid JOIN taskcollections_tasks tt ON tt.tid = th.tid AND tt.tcid = ? ORDER BY hints.h_index;";
+  $sth = database->prepare($sql);
+  $sth->execute(params->{'tcid'});
+
+  @hints = $sth->fetchall_arrayref({});
+
+  template 'tc_xml', {
+    tasks => \@tasks,
+    hints => \@hints
+  }, { layout => 0 };
+
+};
+
 prefix undef;
