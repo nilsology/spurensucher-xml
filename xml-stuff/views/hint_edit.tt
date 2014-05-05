@@ -4,6 +4,7 @@
     <a href="/admin/task/[% tid %]/[% tcid %]" title="Back to Task">Back to Task</a><br><br>
     <form class="admin-form" action="/admin/hint/edit" method="post">
       <input type="hidden" name="tid" value="[% tid %]">
+      <input type="hidden" name="hid" value="[% hid %]">
       <input type="hidden" name="tcid" value="[% tcid %]">
       <textarea name="h_text">[% h_text %]</textarea><br>
       <input type="number" name="h_score" value="[% h_score %]">
